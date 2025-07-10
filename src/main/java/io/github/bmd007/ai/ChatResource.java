@@ -3,26 +3,28 @@ package io.github.bmd007.ai;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.ollama.OllamaChatModel;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ChatResource {
 
     private final ChatClient chatClient;
+    private final EmbeddingModel embeddingModel;
 
-    public ChatResource(OllamaChatModel model) {
+    public ChatResource(OllamaChatModel model, EmbeddingModel embeddingModel) {
         this.chatClient = ChatClient.create(model)
             .mutate()
             .defaultSystem("You are a friendly chat bot that answers question in the voice of a Pirate.")
             .build();
+        this.embeddingModel = embeddingModel;
     }
 
     @GetMapping("/chat")
@@ -37,5 +39,11 @@ public class ChatResource {
             .tools(new DateTimeTools())
             .call()
             .content();
+    }
+
+    @GetMapping("/embed")
+    public Map embed(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
+        EmbeddingResponse embeddingResponse = this.embeddingModel.embedForResponse(List.of(message));
+        return Map.of("embedding", embeddingResponse);
     }
 }

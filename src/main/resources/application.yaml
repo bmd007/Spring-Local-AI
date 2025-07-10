@@ -3,7 +3,15 @@ spring.application.name: spring-ai-local
 spring:
   ai:
     ollama:
-#      base-url: http://localhost:11434
+      init:
+        pull-model-strategy: always
+        embedding:
+          options:
+            model:
+              hf.co/mixedbread-ai/mxbai-embed-large-v1
+          additional-models:
+            - mxbai-embed-large
+            - nomic-embed-text
       chat:
         options:
           model: llama3.1:8b

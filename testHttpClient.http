@@ -3,3 +3,6 @@ GET http://localhost:8080/chat?input="salam azize delam! che rooze emrooz?"
 
 ###
 GET http://localhost:8080/chat?input="What's the date today? Can you set an alarm 10 minutes from now?"
+
+###
+GET http://localhost:8080/embed?message="What's the date today? Can you set an alarm 10 minutes from now?"
