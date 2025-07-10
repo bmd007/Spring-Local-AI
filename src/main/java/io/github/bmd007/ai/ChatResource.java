@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 public class ChatResource {
@@ -45,15 +46,22 @@ public class ChatResource {
                 .build())
             .build();
 
-        ImageResponse response = openAiImageModel.call(
-            new ImagePrompt("A light cream colored mini golden Desert eagle",
-                OpenAiImageOptions.builder()
-                    .quality("hd")
-                    .N(1)
-                    .height(1024)
-                    .width(1024).build())
-        );
-        System.out.println(response.getResult().getOutput().getUrl());
+        CompletableFuture.runAsync(() -> {
+                ImageResponse response = openAiImageModel.call(
+                    new ImagePrompt("A light cream colored mini golden Desert eagle",
+                        OpenAiImageOptions.builder()
+                            .quality("hd")
+                            .N(1)
+                            .height(1024)
+                            .width(1024).build())
+                );
+                System.out.println(response.getResult().getOutput().getUrl());
+            })
+            .exceptionally(throwable -> {
+                System.out.println(throwable);
+                return null;
+            })
+            .join();
 
         return chatClient.prompt(prompt)
             .tools(new DateTimeTools())
