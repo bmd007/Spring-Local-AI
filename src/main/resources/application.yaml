@@ -17,8 +17,7 @@ spring:
           model:
             hf.co/mixedbread-ai/mxbai-embed-large-v1
     openai:
-      image:
-        api-key: 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
+      api-key: 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
   http:
     client:
       factory: jdk
