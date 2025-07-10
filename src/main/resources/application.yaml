@@ -7,3 +7,6 @@ spring:
       chat:
         options:
           model: llama3.1:8b
+  http:
+    client:
+      factory: jdk
