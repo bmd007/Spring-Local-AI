@@ -12,3 +12,7 @@ GET http://localhost:8080/image?input="A light cream colored mini golden Desert 
 
 ###
 GET http://localhost:8080/embed?message="What's the date today? Can you set an alarm 10 minutes from now?"
+
+
+###
+GET http://localhost:8080/explanations/key-figures/market-cap/instruments/9c0ab8c9-67bc-4b77-bbb2-953e2f9eff18

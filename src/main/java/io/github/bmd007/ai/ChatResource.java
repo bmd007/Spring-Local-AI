@@ -13,13 +13,23 @@ import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.math.BigDecimal;
+import java.net.URI;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import static org.springframework.http.HttpHeaders.ACCEPT;
 
 @RestController
 public class ChatResource {
@@ -30,11 +40,14 @@ public class ChatResource {
     private final EmbeddingModel embeddingModel;
     private final OpenAiImageModel openAiImageModel;
     private final ChatClient geminiClient;
+    private final RestClient restClient;
 
     public ChatResource(OllamaChatModel model,
                         @Qualifier("ollamaEmbeddingModel") EmbeddingModel embeddingModel,
                         OpenAiImageModel openAiImageModel,
-                        VertexAiGeminiChatModel vertexAiGeminiChatModel) {
+                        VertexAiGeminiChatModel vertexAiGeminiChatModel,
+                        RestClient.Builder restClientBuilder) {
+        restClient = restClientBuilder.defaultHeader(ACCEPT, MediaType.APPLICATION_JSON_VALUE).build();
         this.ollamaClient = ChatClient.create(model)
             .mutate()
             .defaultSystem("You are a friendly chat bot that. You have access to tools. Use them to answer.")
@@ -45,6 +58,35 @@ public class ChatResource {
             .build();
         this.embeddingModel = embeddingModel;
         this.openAiImageModel = openAiImageModel;
+    }
+
+    @GetMapping("explanations/key-figures/market-cap/instruments/{oderBookId}")
+    public String explainMarketCapNumbers(@PathVariable String oderBookId) {
+
+        var uri = UriComponentsBuilder.fromUri(URI.create("https://api.test.nntech.io"))
+            .path("company-data/v1/key-figures/MARKET_CAPITALIZATION/instruments/{oderBookId}")
+            .queryParam("resolution", "YEAR")
+            .build(oderBookId);
+
+        var marketCap = restClient.get()
+            .uri(uri)
+            .header("x-locale", "en_SE")
+            .retrieve()
+//            .body(KeyFigureDTO.class)
+            .body(String.class);
+        var prompt = Prompt.builder()
+            .content("""
+                Here we have key figures for market capitalization.
+                Explain the overall picture of market cap for this instrument.
+                
+                %s""".formatted(marketCap))
+            .chatOptions(ChatOptions.builder()
+                .temperature(0d)
+                .build())
+            .build();
+        return geminiClient.prompt(prompt)
+            .call()
+            .content();
     }
 
     @GetMapping("/chat/gemini")
@@ -99,4 +141,37 @@ public class ChatResource {
         EmbeddingResponse embeddingResponse = this.embeddingModel.embedForResponse(List.of(message));
         return Map.of("embedding", embeddingResponse);
     }
+
+
+    public record KeyFigureDTO(
+        String currency,
+        List<PointDTO> points,
+        Instant retrievedAt,
+        List<SourceDTO> sources,
+        BigDecimal currentValue,
+        String orderBookId,
+        String displayName,
+        String keyFigureTypeId,
+        int numberOfDecimals,
+        String unit,
+        String graphType,
+        String contentfulKey
+    ) {
+        public record PointDTO(
+            BigDecimal value,
+            String pointType,
+            String fiscalPeriod,
+            String displayName,
+            LocalDate date
+        ) {
+        }
+
+        public record SourceDTO(
+            String source,
+            String displayName,
+            Instant timestamp
+        ) {
+        }
+    }
+
 }
