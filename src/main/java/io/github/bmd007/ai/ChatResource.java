@@ -63,7 +63,7 @@ public class ChatResource {
     @GetMapping("explanations/key-figures/market-cap/instruments/{oderBookId}")
     public String explainMarketCapNumbers(@PathVariable String oderBookId) {
 
-        var uri = UriComponentsBuilder.fromUri(URI.create("https://api.test.nntech.io"))
+        var uri = UriComponentsBuilder.fromUri(URI.create("https://api.prod.nntech.io"))
             .path("company-data/v1/key-figures/MARKET_CAPITALIZATION/instruments/{oderBookId}")
             .queryParam("resolution", "YEAR")
             .build(oderBookId);

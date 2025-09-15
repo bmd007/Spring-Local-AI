@@ -15,4 +15,4 @@ GET http://localhost:8080/embed?message="What's the date today? Can you set an a
 
 
 ###
-GET http://localhost:8080/explanations/key-figures/market-cap/instruments/9c0ab8c9-67bc-4b77-bbb2-953e2f9eff18
+GET http://localhost:8080/explanations/key-figures/market-cap/instruments/bb244052-2ab4-47ed-96d5-9188ff4008a2
