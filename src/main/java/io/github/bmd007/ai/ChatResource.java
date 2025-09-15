@@ -62,7 +62,6 @@ public class ChatResource {
 
     @GetMapping("explanations/key-figures/market-cap/instruments/{oderBookId}")
     public String explainMarketCapNumbers(@PathVariable String oderBookId) {
-
         var uri = UriComponentsBuilder.fromUri(URI.create("https://api.prod.nntech.io"))
             .path("company-data/v1/key-figures/MARKET_CAPITALIZATION/instruments/{oderBookId}")
             .queryParam("resolution", "YEAR")
@@ -141,37 +140,4 @@ public class ChatResource {
         EmbeddingResponse embeddingResponse = this.embeddingModel.embedForResponse(List.of(message));
         return Map.of("embedding", embeddingResponse);
     }
-
-
-    public record KeyFigureDTO(
-        String currency,
-        List<PointDTO> points,
-        Instant retrievedAt,
-        List<SourceDTO> sources,
-        BigDecimal currentValue,
-        String orderBookId,
-        String displayName,
-        String keyFigureTypeId,
-        int numberOfDecimals,
-        String unit,
-        String graphType,
-        String contentfulKey
-    ) {
-        public record PointDTO(
-            BigDecimal value,
-            String pointType,
-            String fiscalPeriod,
-            String displayName,
-            LocalDate date
-        ) {
-        }
-
-        public record SourceDTO(
-            String source,
-            String displayName,
-            Instant timestamp
-        ) {
-        }
-    }
-
 }
